@@ -73,5 +73,10 @@ public class Main {
         ));
 
         // System.out.println(tgtgClient.getItem("item_id"));
+
+        // tgtgClient.setFavorite("item_id", true);
+
+        // System.out.println(tgtgClient.getFavorites());
+
     }
 }

@@ -453,7 +453,71 @@ public class TgtgClient {
 
     }
 
-    // ToDo getFavourites
-    // ToDo setFavourite
+    public JSONObject getFavorites(){
+        double latitude = 0;
+        double longitude = 0;
+        int radius = 21;
+        int pageSize = 50;
+        int page = 0;
 
+        login();
+
+        Map<String, Object> origin = new HashMap<>();
+        origin.put("latitude", latitude);
+        origin.put("longitude", longitude);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("origin", origin);
+        data.put("radius", radius);
+        data.put("user_id", user_id);
+        data.put("paging", Map.of("page", page, "size", pageSize));
+        data.put("bucket", Map.of("filler_type", "Favorites"));
+
+        try {
+            Response response = Jsoup
+                    .connect(getUrl(API_BUCKET_ENDPOINT))
+                    .method(Connection.Method.POST)
+                    .requestBody(new JSONObject(data).toString())
+                    .headers(getHeaders())
+                    .timeout(timeout)
+                    .ignoreContentType(true)
+                    .execute();
+
+            if (response.statusCode() == HttpURLConnection.HTTP_OK) {
+                logger.info("Success in getting favorites.");
+                return (new JSONObject(response.body())); // ToDo parse data
+            } else {
+                logger.error("Getting favorites error. Status code={}", response.statusCode());
+            }
+        } catch (IOException e) {
+            logger.error("Error during getFavorites", e);
+        }
+        return new JSONObject();
+    }
+
+    public void setFavorite(String item_id, boolean is_favorite) {
+        login();
+
+        JSONObject requestBody = new JSONObject()
+                .put("is_favorite", is_favorite);
+
+        try {
+            Response response = Jsoup
+                    .connect(getUrl(API_ITEM_ENDPOINT, item_id, "/setFavorite"))
+                    .method(Connection.Method.POST)
+                    .requestBody(requestBody.toString())
+                    .headers(getHeaders())
+                    .timeout(timeout)
+                    .ignoreContentType(true)
+                    .execute();
+
+            if (response.statusCode() == HttpURLConnection.HTTP_OK){
+                logger.info("Success in setting favorite item id " + item_id);
+            } else {
+                logger.error("Setting favorite error. Status code={}", response.statusCode());
+            }
+        } catch (IOException e) {
+            logger.error("Error during setFavorite", e);
+        }
+    }
 }
